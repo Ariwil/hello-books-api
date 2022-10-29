@@ -30,7 +30,7 @@ def read_all_book():
 
 @books_bp.route("", methods=["POST"])
 def create_books():
-    request_body = request.get_json()
+    request_body = request.get_json() #####!!!!!!! FIGURE OUT WHAT THIS DOES
     new_book = Book(title=request_body["title"], description=request_body["description"])
     db.session.add(new_book)
     db.session.commit()
@@ -60,6 +60,17 @@ def get_one_book(book_id): #parameter here (book_id) must match route parameter 
         "description": book.description
     }#Flask will auto. converet a dict into an HTTP response body
 
+@books_bp.route("/<book_id>", methods=["PUT"])
+def update_book(book_id):
+    book = validate_book(book_id)
+    request_body = request.get_json() #reads the HTTP request body/parses the JSON body into a python dict
+
+    book.title=request_body["title"]
+    book.description=request_body["description"]
+    # db.session.add()
+    db.session.commit() #every time a SQLA model is updated, we want to commit the change to the database using this line
+    
+    return make_response(f"Book #{book.id} successfully updated", 200)
 
 # @books_bp.route("", methods=["GET"])
 # def handle_books():
