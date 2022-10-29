@@ -50,7 +50,7 @@ def validate_book(book_id):
 
     return book
 
-@books_bp.route("/<book_id>", methods=["GET"])
+@books_bp.route("/<book_id>", methods=["GET"]) #GET requests usually don't include a request body
 def get_one_book(book_id): #parameter here (book_id) must match route parameter in line above 
     book = validate_book(book_id)
     # book = Book.query.get(book_id) #SQLAL syntax to look for one book, returns an instance of Book #primary key is supposed to be in the (), this one was provied in the route parameter
@@ -71,6 +71,15 @@ def update_book(book_id):
     db.session.commit() #every time a SQLA model is updated, we want to commit the change to the database using this line
     
     return make_response(f"Book #{book.id} successfully updated", 200)
+
+@books_bp.route("/<book_id>", methods=["DELETE"])
+def delete_book(book_id):
+    book = validate_book(book_id)
+    
+    db.session.delete(book) #Use SQLA's fxns to tell DB to prepare to delete our book
+    db.session.commit() #Actually apply our DB changes (of deletion)
+
+    return make_response(f"Book #{book_id} successfully deleted") #Can still access book_id bc variable itslef is stll in app's scope. Object stored in memeory and referenced by book doesn't auto update in response to changes in DB
 
 # @books_bp.route("", methods=["GET"])
 # def handle_books():
