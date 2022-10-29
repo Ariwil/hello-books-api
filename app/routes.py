@@ -16,25 +16,50 @@ from flask import Blueprint, jsonify, abort, make_response, request
 
 books_bp = Blueprint("books", __name__, url_prefix="/books")
 
+@books_bp.route("", methods=["GET"])
+def read_all_book():
+    books = Book.query.all() #returns list of instances of Book
+    books_response = []
+    for book in books:
+        books_response.append({
+            "id": book.id,
+            "title": book.title,
+            "description": book.description
+        })
+    return jsonify(books_response) #make_response doesn't handle lists
+
 @books_bp.route("", methods=["POST"])
-def handle_books():
+def create_books():
     request_body = request.get_json()
     new_book = Book(title=request_body["title"], description=request_body["description"])
     db.session.add(new_book)
     db.session.commit()
     
     return make_response(f"Book {new_book.title} successfully created", 201)
-# def validate_book(book_id):
-#     try:
-#         book_id = int(book_id)
-#     except:
-#         abort(make_response({"message": f"book {book_id} invalid"}, 400))
 
-#     for book in books:
-#         if book.id == book_id:
-#             return book
+def validate_book(book_id):
+    try:
+        book_id = int(book_id)
+    except:
+        abort(make_response({"message": f"book {book_id} invalid"}, 400))
+
+    book = Book.query.get(book_id)
     
-#     abort(make_response({"message": f"book {book_id} not found"}, 404))
+    if not book:
+        abort(make_response({"message": f"book {book_id} not found"}, 404))
+
+    return book
+
+@books_bp.route("/<book_id>", methods=["GET"])
+def get_one_book(book_id): #parameter here (book_id) must match route parameter in line above 
+    book = validate_book(book_id)
+    # book = Book.query.get(book_id) #SQLAL syntax to look for one book, returns an instance of Book #primary key is supposed to be in the (), this one was provied in the route parameter
+    return {
+        "id": book.id,
+        "title": book.title,
+        "description": book.description
+    }#Flask will auto. converet a dict into an HTTP response body
+
 
 # @books_bp.route("", methods=["GET"])
 # def handle_books():
