@@ -17,8 +17,15 @@ from flask import Blueprint, jsonify, abort, make_response, request
 books_bp = Blueprint("books", __name__, url_prefix="/books")
 
 @books_bp.route("", methods=["GET"])
-def read_all_book():
-    books = Book.query.all() #returns list of instances of Book
+def read_all_booka():
+    title_query = request.args.get("title") #Returns the value of the query param if it was set, or "None" if query param isn't found
+    if title_query: #Checks if query param was provided
+        books = Book.query.filter_by(title=title_query)
+        # print(f"Books = {books}") --- This prints out a SELECT query - interesting
+    else:
+        books = Book.query.all()
+
+    # books = Book.query.all() #returns list of instances of Book
     books_response = []
     for book in books:
         books_response.append({
@@ -80,6 +87,10 @@ def delete_book(book_id):
     db.session.commit() #Actually apply our DB changes (of deletion)
 
     return make_response(f"Book #{book_id} successfully deleted") #Can still access book_id bc variable itslef is stll in app's scope. Object stored in memeory and referenced by book doesn't auto update in response to changes in DB
+
+
+
+
 
 # @books_bp.route("", methods=["GET"])
 # def handle_books():
