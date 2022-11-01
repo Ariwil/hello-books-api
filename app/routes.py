@@ -42,7 +42,7 @@ def create_books():
     db.session.add(new_book)
     db.session.commit()
     
-    return make_response(f"Book {new_book.title} successfully created", 201)
+    return make_response(jsonify(f"Book {new_book.title} successfully created"), 201)
 
 def validate_book(book_id):
     try:
@@ -77,7 +77,7 @@ def update_book(book_id):
     # db.session.add()
     db.session.commit() #every time a SQLA model is updated, we want to commit the change to the database using this line
     
-    return make_response(f"Book #{book.id} successfully updated", 200)
+    return make_response(jsonify(f"Book #{book.id} successfully updated"), 200)
 
 @books_bp.route("/<book_id>", methods=["DELETE"])
 def delete_book(book_id):
@@ -86,7 +86,7 @@ def delete_book(book_id):
     db.session.delete(book) #Use SQLA's fxns to tell DB to prepare to delete our book
     db.session.commit() #Actually apply our DB changes (of deletion)
 
-    return make_response(f"Book #{book_id} successfully deleted") #Can still access book_id bc variable itslef is stll in app's scope. Object stored in memeory and referenced by book doesn't auto update in response to changes in DB
+    return make_response(jsonify(f"Book #{book_id} successfully deleted")) #Can still access book_id bc variable itslef is stll in app's scope. Object stored in memeory and referenced by book doesn't auto update in response to changes in DB
 
 
 

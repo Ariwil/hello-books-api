@@ -19,3 +19,15 @@ def test_get_one_book(client, two_saved_books): #can add multiple fixtures
         "title": "Ocean Book",
         "description": "watr 4evr"
     }
+
+def test_create_one_book(client):
+    # Act
+    response = client.post("/books", json={
+        "title": "New Book",
+        "description": "The Best!"
+    })
+    response_body = response.get_json() #could alternatively use response.get_data(as_text=True), if we hadn't jsonified the response body in our POST/books route
+
+    # Assert
+    assert response.status_code == 201
+    assert response_body == "Book New Book successfully created"
