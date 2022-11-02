@@ -34,7 +34,7 @@ def read_all_books():
 @books_bp.route("", methods=["POST"])
 def create_books():
     request_body = request.get_json() #####!!!!!!! FIGURE OUT WHAT THIS DOES
-    new_book = Book(title=request_body["title"], description=request_body["description"])
+    new_book = Book.from_dict(request_body)
     db.session.add(new_book)
     db.session.commit()
     
