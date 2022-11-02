@@ -17,7 +17,7 @@ from flask import Blueprint, jsonify, abort, make_response, request
 books_bp = Blueprint("books", __name__, url_prefix="/books")
 
 @books_bp.route("", methods=["GET"])
-def read_all_booka():
+def read_all_books():
     title_query = request.args.get("title") #Returns the value of the query param if it was set, or "None" if query param isn't found
     if title_query: #Checks if query param was provided
         books = Book.query.filter_by(title=title_query)
@@ -28,11 +28,7 @@ def read_all_booka():
     # books = Book.query.all() #returns list of instances of Book
     books_response = []
     for book in books:
-        books_response.append({
-            "id": book.id,
-            "title": book.title,
-            "description": book.description
-        })
+        books_response.append(book.to_dict())
     return jsonify(books_response) #make_response doesn't handle lists
 
 @books_bp.route("", methods=["POST"])
@@ -61,11 +57,7 @@ def validate_book(book_id):
 def get_one_book(book_id): #parameter here (book_id) must match route parameter in line above 
     book = validate_book(book_id)
     # book = Book.query.get(book_id) #SQLAL syntax to look for one book, returns an instance of Book #primary key is supposed to be in the (), this one was provied in the route parameter
-    return {
-        "id": book.id,
-        "title": book.title,
-        "description": book.description
-    }#Flask will auto. converet a dict into an HTTP response body
+    return book.to_dict()#Flask will auto. converet a dict into an HTTP response body
 
 @books_bp.route("/<book_id>", methods=["PUT"])
 def update_book(book_id):
