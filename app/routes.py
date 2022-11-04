@@ -16,6 +16,19 @@ from flask import Blueprint, jsonify, abort, make_response, request
 
 books_bp = Blueprint("books", __name__, url_prefix="/books")
 
+def validate_model(cls, model_id):
+    try:
+        model_id = int(model_id)
+    except:
+        abort(make_response({"message": f"{cls.__name__} {model_id} invalid"}, 400))
+
+    model = cls.query.get(model_id)
+    
+    if not model:
+        abort(make_response({"message": f"{cls.__name__} {model_id} not found"}, 404))
+
+    return model
+
 @books_bp.route("", methods=["GET"])
 def read_all_books():
     title_query = request.args.get("title") #Returns the value of the query param if it was set, or "None" if query param isn't found
@@ -40,28 +53,15 @@ def create_books():
     
     return make_response(jsonify(f"Book {new_book.title} successfully created"), 201)
 
-def validate_book(book_id):
-    try:
-        book_id = int(book_id)
-    except:
-        abort(make_response({"message": f"book {book_id} invalid"}, 400))
-
-    book = Book.query.get(book_id)
-    
-    if not book:
-        abort(make_response({"message": f"book {book_id} not found"}, 404))
-
-    return book
-
 @books_bp.route("/<book_id>", methods=["GET"]) #GET requests usually don't include a request body
 def get_one_book(book_id): #parameter here (book_id) must match route parameter in line above 
-    book = validate_book(book_id)
+    book = validate_model(Book, book_id)
     # book = Book.query.get(book_id) #SQLAL syntax to look for one book, returns an instance of Book #primary key is supposed to be in the (), this one was provied in the route parameter
     return book.to_dict()#Flask will auto. converet a dict into an HTTP response body
 
 @books_bp.route("/<book_id>", methods=["PUT"])
 def update_book(book_id):
-    book = validate_book(book_id)
+    book = validate_model(Book, book_id)
     request_body = request.get_json() #reads the HTTP request body/parses the JSON body into a python dict
 
     book.title=request_body["title"]
@@ -73,7 +73,7 @@ def update_book(book_id):
 
 @books_bp.route("/<book_id>", methods=["DELETE"])
 def delete_book(book_id):
-    book = validate_book(book_id)
+    book = validate_model(Book, book_id)
     
     db.session.delete(book) #Use SQLA's fxns to tell DB to prepare to delete our book
     db.session.commit() #Actually apply our DB changes (of deletion)
@@ -98,7 +98,7 @@ def delete_book(book_id):
 
 # @books_bp.route("/<book_id>", methods=["GET"])
 # def handle_book(book_id):
-#     book = validate_book(book_id)
+#     book = validate_model(Book, book_id)
 #     print(book)
 #     return {
 #         "id": book.id,
