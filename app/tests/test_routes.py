@@ -1,6 +1,6 @@
 import pytest
 from werkzeug.exceptions import HTTPException
-from app.routes import validate_model
+from app.routes.books_routes import validate_model
 from app.models.book import Book
 
 def test_get_all_books_with_no_records(client): #We pass in the client fixture here, which we registered in conftest.py.
